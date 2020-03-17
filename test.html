@@ -1,0 +1,44 @@
+<html>
+<head>
+  <script>
+    // Currently a Webassembly shared library needs to be fed a memory for its
+    // internal stack (see xor.wast exports)
+    // In the code below, 256 are Webassembly pages, each with 64KB, which is insane,
+    // but this is the default emscripten value used when compiling a wasm shared library,
+    // it maybe changed though, but the default is good for our purpose here.
+    // Memory base serves the purpose of allowing multiple modules to share the same
+    // memory, so each would have its own portion in memory.
+    const importObj = {
+        env: {
+            memory: new WebAssembly.Memory({initial: 256, maximum: 256}),
+            __memory_base: 1024,
+            table: new WebAssembly.Table({
+                initial: 2,
+                maximum: 2,
+                element: 'anyfunc',
+            }),
+            consoleLog: function(s) { console.log(s); }
+        }
+    };
+
+      // Load the module using the newest Streaming API
+    fetch('test.wasm').then(response =>
+        response.arrayBuffer()
+    ).then(bytes =>
+        WebAssembly.instantiate(bytes, importObj)
+    ).then(obj => {
+        var exports = obj.instance.exports; // the exports of that instance
+        var func = exports.test;
+        // Add a listener to the button so we can execute the xor function when the button is pressed.
+        var button = document.getElementById('run');
+        button.addEventListener('click', function() {
+          alert(func(11));
+        }, false);
+      }
+    );
+  </script>
+</head>
+<body>
+  <input type="button" id="run" value="click for test"/>
+</body>
+</html>
