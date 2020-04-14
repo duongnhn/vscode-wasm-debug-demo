@@ -17,11 +17,10 @@
                 maximum: 2,
                 element: 'anyfunc',
             }),
-            consoleLog: function(s) { console.log(s); }
         }
     };
 
-      // Load the module using the newest Streaming API
+    // Load the module using the newest Streaming API
     fetch('test.wasm').then(response =>
         response.arrayBuffer()
     ).then(bytes =>
